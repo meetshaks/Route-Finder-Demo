@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhaka Bus Route Finder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 20px;
+            align-items: end;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: border-color 0.3s;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .search-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            padding: 0 40px 40px;
+        }
+
+        .route-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #4CAF50;
+        }
+
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .route-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .route-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .direct-routes {
+            margin-bottom: 30px;
+        }
+
+        .bus-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .bus-name {
+            font-weight: 600;
+            color: #2196F3;
+            margin-bottom: 5px;
+        }
+
+        .bus-stops {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .transfer-route {
+            border-left-color: #FF9800;
+        }
+
+        .transfer-route .route-badge {
+            background: #FF9800;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .instruction-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .bus-icon {
+            background: #2196F3;
+            color: white;
+        }
+
+        .transfer-icon {
+            background: #FF9800;
+            color: white;
+        }
+
+        .instruction-content {
+            flex: 1;
+        }
+
+        .instruction-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .instruction-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c62828;
+        }
+
+        .route-preference {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .route-preference-icon {
+            font-size: 1.2em;
+        }
+
+        .route-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #4CAF50;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .instruction-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .instruction-icon {
+            font-size: 1.5em;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f8f9fa;
+        }
+
+        .bus-icon {
+            color: #2196F3;
+        }
+
+        .transfer-icon {
+            color: #FF9800;
+        }
+
+        .instruction-content {
+            flex: 1;
+        }
+
+        .instruction-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .instruction-details {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .search-section, .results-section {
+                padding: 20px;
+            }
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .language-selector select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .language-selector select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="language-selector">
+                <select id="languageSelect" onchange="changeLanguage(this.value)">
+                    <option value="en" {% if session.language == 'en' %}selected{% endif %}>English</option>
+                    <option value="bn" {% if session.language == 'bn' %}selected{% endif %}>বাংলা</option>
+                </select>
+            </div>
+            <h1>{{ translations.app_title }}</h1>
+            <p>{{ translations.app_subtitle }}</p>
+        </div>
+
+        <div class="search-section">
+            <form class="search-form" id="routeForm">
+                <div class="form-group">
+                    <label for="startLocation">{{ translations.start_location }}</label>
+                    <select id="startLocation" required>
+                        <option value="">{{ translations.start_location }}...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="endLocation">{{ translations.end_location }}</label>
+                    <select id="endLocation" required>
+                        <option value="">{{ translations.end_location }}...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="routePreference">{{ translations.route_preference }}</label>
+                    <select id="routePreference">
+                        <option value="fastest">{{ translations.fastest_route }}</option>
+                        <option value="least_transfer">{{ translations.least_transfers }}</option>
+                        <option value="shortest">{{ translations.shortest_distance }}</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="search-btn">{{ translations.find_routes }}</button>
+            </form>
+        </div>
+
+        <div class="results-section" id="results" style="display: none;">
+            <!-- Results will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        // Initialize variables
+        let places = [];  // Changed from const to let
+        const translations = {{ translations|tojson|safe }};
+
+        // Load places on page load
+        async function loadPlaces() {
+            try {
+                const response = await fetch('/api/places');
+                const data = await response.json();
+                places = data;  // Now we can modify places
+                
+                const startSelect = document.getElementById('startLocation');
+                const endSelect = document.getElementById('endLocation');
+                
+                // Clear existing options
+                startSelect.innerHTML = `<option value="">${translations.start_location}...</option>`;
+                endSelect.innerHTML = `<option value="">${translations.end_location}...</option>`;
+                
+                // Add new options
+                places.forEach(place => {
+                    startSelect.add(new Option(place, place));
+                    endSelect.add(new Option(place, place));
+                });
+            } catch (error) {
+                console.error('Error loading places:', error);
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('routeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const start = document.getElementById('startLocation').value;
+            const end = document.getElementById('endLocation').value;
+            const preference = document.getElementById('routePreference').value;
+            
+            if (!start || !end) {
+                alert('Please select both starting point and destination');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading">🔍 Finding best routes...</div>';
+            
+            try {
+                const response = await fetch('/api/find-route', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ start, end, preference })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayResults(data);
+                } else {
+                    resultsDiv.innerHTML = `<div class="error">${data.error}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="error">Error finding routes. Please try again.</div>';
+                console.error('Error:', error);
+            }
+        });
+
+        async function changeLanguage(lang) {
+            try {
+                const response = await fetch('/api/set-language', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ language: lang })
+                });
+                
+                if (response.ok) {
+                    // Reload the page to get new translations
+                    window.location.reload();
+                } else {
+                    console.error('Failed to change language');
+                }
+            } catch (error) {
+                console.error('Error changing language:', error);
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            let html = '';
+            
+            // Display route preference
+            const preferenceLabels = {
+                'fastest': translations.fastest_route,
+                'least_transfer': translations.least_transfers,
+                'shortest': translations.shortest_distance
+            };
+            
+            html += `
+                <div class="route-preference">
+                    <span class="route-preference-icon">${preferenceLabels[data.preference]}</span>
+                </div>
+            `;
+            
+            // Display direct routes
+            if (data.direct_routes && data.direct_routes.length > 0) {
+                html += `
+                    <div class="direct-routes">
+                        <div class="route-card">
+                            <div class="route-header">
+                                <div class="route-title">${translations.direct_routes}</div>
+                                <div class="route-badge">${data.direct_routes.length} ${translations.options}</div>
+                            </div>
+                `;
+                
+                data.direct_routes.forEach(route => {
+                    html += `
+                        <div class="bus-item">
+                            <div class="bus-name">🚌 ${route.bus_name}</div>
+                            <div class="bus-stops">
+                                ${route.stops_count} ${translations.stops}: ${route.path.join(' → ')}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            }
+            
+            // Display transfer route
+            if (data.transfer_route) {
+                html += `
+                    <div class="route-card transfer-route">
+                        <div class="route-header">
+                            <div class="route-title">${translations.route_with_transfers}</div>
+                            <div class="route-badge">${data.transfer_route.transfers} ${translations.transfers}</div>
+                        </div>
+                        
+                        <div class="route-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${data.transfer_route.transfers}</div>
+                                <div class="stat-label">${translations.transfers}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${data.transfer_route.path.length - 1}</div>
+                                <div class="stat-label">${translations.total_stops}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${data.transfer_route.total_cost}</div>
+                                <div class="stat-label">${data.preference === 'time' ? translations.minutes : data.preference === 'distance' ? translations.stops : translations.transfers}</div>
+                            </div>
+                        </div>
+                `;
+                
+                if (data.instructions && data.instructions.length > 0) {
+                    data.instructions.forEach(instruction => {
+                        if (instruction.type === 'ride') {
+                            html += `
+                                <div class="instruction-item">
+                                    <div class="instruction-icon bus-icon">🚌</div>
+                                    <div class="instruction-content">
+                                        <div class="instruction-title">${translations.take_bus} ${instruction.bus}</div>
+                                        <div class="instruction-details">
+                                            ${translations.from} ${instruction.from} ${translations.to} ${instruction.to}<br>
+                                            ${translations.route}: ${instruction.stops.join(' → ')}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (instruction.type === 'transfer') {
+                            html += `
+                                <div class="instruction-item">
+                                    <div class="instruction-icon transfer-icon">🔄</div>
+                                    <div class="instruction-content">
+                                        <div class="instruction-title">${translations.transfer_at} ${instruction.location}</div>
+                                        <div class="instruction-details">
+                                            ${translations.change_from} ${instruction.from_bus} ${translations.to_bus} ${instruction.to_bus}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+                
+                html += '</div>';
+            }
+            
+            if (!html) {
+                html = `
+                    <div class="no-results">
+                        <h3>${translations.no_routes}</h3>
+                        <p>${translations.no_routes_message.replace('{start}', data.start).replace('{end}', data.end)}</p>
+                        <p>${translations.check_locations}</p>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // Load places when page loads
+        loadPlaces();
+    </script>
+</body>
+</html>
