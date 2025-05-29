@@ -346,6 +346,196 @@
             outline: none;
             border-color: #4CAF50;
         }
+
+        /* Custom Dropdown Styles */
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-header {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.3s;
+        }
+
+        .dropdown-header:hover {
+            border-color: #4CAF50;
+        }
+
+        .dropdown-header::after {
+            content: '▼';
+            font-size: 12px;
+            color: #666;
+            transition: transform 0.3s;
+        }
+
+        .dropdown-header.active::after {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .dropdown-list.active {
+            display: block;
+        }
+
+        .dropdown-list-up {
+            top: auto;
+            bottom: 100%;
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        .dropdown-item {
+            padding: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .dropdown-search {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .dropdown-search input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .dropdown-search input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 2000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 500px; /* Max width of the modal */
+            width: 90%;
+            position: relative;
+            max-height: 80%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        #modalSearchInput {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .location-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .location-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .location-list li:last-child {
+            border-bottom: none;
+        }
+
+        .location-list li:hover {
+            background-color: #f9f9f9;
+        }
+
+        .location-input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: border-color 0.3s;
+            cursor: pointer;
+        }
+
+        .location-input:focus {
+             outline: none;
+             border-color: #4CAF50;
+        }
     </style>
 </head>
 <body>
@@ -364,22 +554,20 @@
         <div class="search-section">
             <form class="search-form" id="routeForm">
                 <div class="form-group">
-                    <label for="startLocation">{{ translations.start_location }}</label>
-                    <select id="startLocation" required>
-                        <option value="">{{ translations.start_location }}...</option>
-                    </select>
+                    <label for="startLocationInput">{{ translations.start_location }}</label>
+                    <input type="text" id="startLocationInput" class="location-input" placeholder="{{ translations.start_location }}..." readonly required>
+                    <input type="hidden" id="startLocation" name="start">
                 </div>
                 
                 <div class="form-group">
-                    <label for="endLocation">{{ translations.end_location }}</label>
-                    <select id="endLocation" required>
-                        <option value="">{{ translations.end_location }}...</option>
-                    </select>
+                    <label for="endLocationInput">{{ translations.end_location }}</label>
+                    <input type="text" id="endLocationInput" class="location-input" placeholder="{{ translations.end_location }}..." readonly required>
+                     <input type="hidden" id="endLocation" name="end">
                 </div>
 
                 <div class="form-group">
                     <label for="routePreference">{{ translations.route_preference }}</label>
-                    <select id="routePreference">
+                    <select id="routePreference" name="preference">
                         <option value="fastest">{{ translations.fastest_route }}</option>
                         <option value="least_transfer">{{ translations.least_transfers }}</option>
                         <option value="shortest">{{ translations.shortest_distance }}</option>
@@ -395,41 +583,113 @@
         </div>
     </div>
 
+    <!-- Location Selection Modal -->
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Select a Location</h2>
+            <input type="text" id="modalSearchInput" placeholder="Search location...">
+            <ul id="modalLocationList" class="location-list"></ul>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='places.js') }}"></script>
     <script>
         // Initialize variables
-        let places = [];  // Changed from const to let
-        const translations = {{ translations|tojson|safe }};
+        const translations = JSON.parse('{{ translations|tojson|safe }}');
 
-        // Load places on page load
-        async function loadPlaces() {
-            try {
-                const response = await fetch('/api/places');
-                const data = await response.json();
-                places = data;  // Now we can modify places
-                
-                const startSelect = document.getElementById('startLocation');
-                const endSelect = document.getElementById('endLocation');
-                
-                // Clear existing options
-                startSelect.innerHTML = `<option value="">${translations.start_location}...</option>`;
-                endSelect.innerHTML = `<option value="">${translations.end_location}...</option>`;
-                
-                // Add new options
-                places.forEach(place => {
-                    startSelect.add(new Option(place, place));
-                    endSelect.add(new Option(place, place));
-                });
-            } catch (error) {
-                console.error('Error loading places:', error);
-            }
+        // Reset fields on page load
+        window.addEventListener('load', () => {
+            startLocationInput.value = '';
+            endLocationInput.value = '';
+            startLocationHidden.value = '';
+            endLocationHidden.value = '';
+            document.getElementById('results').style.display = 'none';
+            modal.style.display = 'none'; // Ensure modal is hidden on load
+        });
+
+        // Get modal elements
+        const modal = document.getElementById('locationModal');
+        const closeButton = modal.querySelector('.close-button');
+        const modalSearchInput = document.getElementById('modalSearchInput');
+        const modalLocationList = document.getElementById('modalLocationList');
+
+        // Get input elements
+        const startLocationInput = document.getElementById('startLocationInput');
+        const endLocationInput = document.getElementById('endLocationInput');
+        const startLocationHidden = document.getElementById('startLocation');
+        const endLocationHidden = document.getElementById('endLocation');
+
+        let currentInput = null; // To track which input triggered the modal
+
+        // Function to open the modal
+        function openModal(inputElement) {
+            modal.style.display = 'block';
+            currentInput = inputElement;
+            renderModalList(places);
+            modalSearchInput.value = '';
+            modalSearchInput.focus();
         }
+
+        // Function to close the modal
+        function closeModal() {
+            modal.style.display = 'none';
+            currentInput = null;
+        }
+
+        // Render the list of locations in the modal
+        function renderModalList(locationArray) {
+            modalLocationList.innerHTML = ''; // Clear previous list
+            locationArray.forEach(location => {
+                const li = document.createElement('li');
+                li.textContent = location;
+                li.addEventListener('click', () => {
+                    selectLocation(location);
+                });
+                modalLocationList.appendChild(li);
+            });
+        }
+
+        // Handle location selection from the modal
+        function selectLocation(location) {
+            if (currentInput === startLocationInput) {
+                startLocationInput.value = location;
+                startLocationHidden.value = location;
+            } else if (currentInput === endLocationInput) {
+                endLocationInput.value = location;
+                endLocationHidden.value = location;
+            }
+            closeModal();
+        }
+
+        // Event listeners
+        startLocationInput.addEventListener('click', () => openModal(startLocationInput));
+        endLocationInput.addEventListener('click', () => openModal(endLocationInput));
+
+        closeButton.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside the modal content
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Filter modal list based on search input
+        modalSearchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredPlaces = places.filter(place => 
+                place.toLowerCase().includes(searchTerm)
+            );
+            renderModalList(filteredPlaces);
+        });
 
         // Handle form submission
         document.getElementById('routeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const start = document.getElementById('startLocation').value;
-            const end = document.getElementById('endLocation').value;
+            const start = startLocationHidden.value;
+            const end = endLocationHidden.value;
             const preference = document.getElementById('routePreference').value;
             
             if (!start || !end) {
@@ -597,9 +857,6 @@
             
             resultsDiv.innerHTML = html;
         }
-
-        // Load places when page loads
-        loadPlaces();
     </script>
 </body>
 </html>
