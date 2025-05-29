@@ -22,9 +22,19 @@ class BusRouteFinder:
         with open(bus_data_file, 'r', encoding='utf-8') as f:
             bus_data = json.load(f)
         
-        # Load places
-        with open(places_file, 'r', encoding='utf-8') as f:
-            places = [line.strip() for line in f.readlines() if line.strip()]
+        # Load places from places.js
+        with open('static/places.js', 'r', encoding='utf-8') as f:
+            js_content = f.read()
+        
+        # Extract the array from the JavaScript content
+        # Assuming the format is 'var places = [...];'
+        match = re.search(r'var places = (.*?);', js_content, re.DOTALL)
+        if match:
+            places_array_str = match.group(1)
+            # Safely evaluate the string as a Python literal (list)
+            places = json.loads(places_array_str)
+        else:
+            places = [] # Fallback to empty list if parsing fails
         
         self.all_stops = set(places)
         self._process_bus_routes(bus_data)
